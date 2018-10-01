@@ -13,6 +13,9 @@ io.on('connection', (socket) => {
     socket.on('disconnect', () => {
         console.log("Bye~ client")
     })
+    socket.on('greet', () => {
+        socket.emit("greet", "Hi~ Client")
+    })
 })
 
 server.listen(3000, () => {

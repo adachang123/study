@@ -9,6 +9,14 @@
     </script>
 </head>
 <body>
-    <div> Here </div>
+    <div id="msg"></div>
+    <script>
+        socket.on("connect", function() {
+            socket.emit("greet")
+        })
+        socket.on("greet", function(msg) {
+            document.getElementById('msg').innerText = msg
+        })
+    </script>
 </body>
 </html>
