@@ -28,6 +28,11 @@ io.on('connection', (socket) => {
         io.emit('online', onlineCount)
         console.log("Close connection, connected: " + onlineCount)
     })
+
+    socket.on('send', (msg) => {
+        console.log(msg)
+        io.emit('msg', msg)
+    })
 })
 
 server.listen(3000, () => {
