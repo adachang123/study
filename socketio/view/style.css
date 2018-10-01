@@ -29,6 +29,10 @@ html, body {
     text-align: center;
 }
 
+#send-box input.error {
+    border: 1px solid red;
+}
+
 #send-box input {
     display: inline-block;
 }

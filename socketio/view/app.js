@@ -21,14 +21,23 @@ function setupSubmitForm() {
 
         let formData = {};
         let formChild = sendForm.children;
+        let hasContent= true;
 
         for(let i =0; i < sendForm.childElementCount; i++) {
             let child = formChild[i];
             if (child.name !== "") {
-                formData[child.name] = child.value;
+                let msg = child.value;
+                hasContent = (msg === "" | !msg) ? false : true;
+                if (hasContent) {
+                    child.classList.remove('error')
+                    formData[child.name] = msg;
+                } else {
+                    child.classList.add('error')
+                }
             }
         }
-        socket.emit("send", formData);
+        if (hasContent)
+            socket.emit("send", formData);
     })
 }
 
