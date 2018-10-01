@@ -44,6 +44,13 @@ io.on('connection', (socket) => {
             return;
         records.push(msg)
     })
+
+    socket.on('remove-all', ()=> {
+        console.log("Remove all data!!!")
+        records.removeAll(function() {
+            io.emit('msg-clear')
+        })
+    })
 })
 
 records.on('new_message', (msg) => {

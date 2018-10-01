@@ -10,10 +10,19 @@ html, body {
     display: block;
     position: relative;
 }
+#action-bar {
+    padding-bottom: 5px;
+    height: 20px;
+}
 
 #status-box {
-    text-align: right;
     font-size: .6em;
+    float: left;
+}
+
+#remove-all-btn {
+    display: inline-block;
+    float: right;
 }
 
 #content {

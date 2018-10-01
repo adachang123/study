@@ -70,7 +70,16 @@ function rmMsgFromBox() {
     childs[0].remove()
 }
 
-function setupReceiveMsg() {
+function clearMsgs() {
+    let content = document.getElementById('content')
+    let childs = content.children
+    const size = childs.length -1
+    for (let i=0; i < size; i++) {
+        childs[1].remove()
+    }
+}
+
+function setupMsgEvents() {
     let content = document.getElementById('content');
     const nameInputBox = document.getElementById('name')
     const name = getCookie('name')
@@ -80,6 +89,7 @@ function setupReceiveMsg() {
     }
 
     socket.on('msg', addMsgToBox)
+    socket.on('msg-clear', clearMsgs)
 }
 
 function loadChatRecords() {
@@ -96,11 +106,15 @@ function loadChatRecords() {
     })
 }
 
+function onRemoveAll() {
+    socket.emit('remove-all')
+}
+
 var max_record;
 
 document.addEventListener("DOMContentLoaded", () => {
     setupConnectStatus();
     setupSubmitForm();
-    setupReceiveMsg();
+    setupMsgEvents();
     loadChatRecords();
 })

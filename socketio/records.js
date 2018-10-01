@@ -26,6 +26,10 @@ class Records extends EventEmitter {
         this.emit('new_message', msg)
     }
 
+    removeAll(cb) {
+        Message.deleteMany({}, cb);
+    }
+
     get(cb) {
         Message.find((err, msgs) => {
             cb(msgs)
