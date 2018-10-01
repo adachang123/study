@@ -1,5 +1,6 @@
 const express = require('express')
 const app = express()
+const records = require('./records.js')
 
 const server = require('http').Server(app)
 const io = require('socket.io')(server)
@@ -26,6 +27,8 @@ io.on('connection', (socket) => {
     onlineCount++;
     console.log("New connection, connected: " + onlineCount)
     io.emit('online', onlineCount)
+    socket.emit('maxRecord', records.getMax())
+    socket.emit('chatRecord', records.get())
 
     socket.on('disconnect', () => {
         onlineCount--;
@@ -37,8 +40,12 @@ io.on('connection', (socket) => {
         console.log(msg)
         if (Object.keys(msg).length < 2)
             return;
-        io.emit('msg', msg)
+        records.push(msg)
     })
+})
+
+records.on('new_message', (msg) => {
+    io.emit('msg', msg)
 })
 
 server.listen(3000, () => {

@@ -43,6 +43,31 @@ function setupSubmitForm() {
     })
 }
 
+function addMsgToBox(data) {
+    let content = document.getElementById('content')
+    let msgBox = document.createElement('div')
+    msgBox.className = 'msg'
+    let nameBox = document.createElement('span')
+    nameBox.className = 'name'
+    let name = document.createTextNode(data.name)
+    let msg = document.createTextNode(data.msg)
+
+    nameBox.appendChild(name)
+    msgBox.appendChild(nameBox)
+    msgBox.appendChild(msg)
+    content.appendChild(msgBox)
+
+    if (content.children.length > max_record) {
+        rmMsgFromBox()
+    }
+}
+
+function rmMsgFromBox() {
+    let content = document.getElementById('content')
+    let childs = content.children
+    childs[0].remove()
+}
+
 function setupReceiveMsg() {
     let content = document.getElementById('content');
     const nameInputBox = document.getElementById('name')
@@ -52,23 +77,28 @@ function setupReceiveMsg() {
         nameInputBox.value = name;
     }
 
-    socket.on('msg', (data) => {
-        let msgBox = document.createElement('div')
-        msgBox.className = 'msg'
-        let nameBox = document.createElement('span')
-        nameBox.className = 'name'
-        let name = document.createTextNode(data.name)
-        let msg = document.createTextNode(data.msg)
+    socket.on('msg', addMsgToBox)
+}
 
-        nameBox.appendChild(name)
-        msgBox.appendChild(nameBox)
-        msgBox.appendChild(msg)
-        content.appendChild(msgBox)
+function loadChatRecords() {
+    let max_record;
+
+    socket.on('chatRecord', function(msgs) {
+        for (let i=0; i < msgs.length; i++) {
+            addMsgToBox(msgs[i]) //?? check example source
+        }
+    })
+
+    socket.on('maxRecord', (amount) => {
+        max_record = amount
     })
 }
+
+var max_record;
 
 document.addEventListener("DOMContentLoaded", () => {
     setupConnectStatus();
     setupSubmitForm();
     setupReceiveMsg();
+    loadChatRecords();
 })
