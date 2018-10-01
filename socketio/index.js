@@ -8,13 +8,25 @@ app.get('/', (req, res) => {
     res.sendFile(__dirname + '/view/index.html')
 })
 
+app.get('/app.js', (req, res) => {
+    res.sendFile(__dirname + '/view/app.js')
+})
+
+app.get('/style.css', (req, res) => {
+    res.sendFile(__dirname + '/view/style.css')
+})
+
+let onlineCount = 0;
+
 io.on('connection', (socket) => {
-    console.log("Hello client")
+    onlineCount++;
+    console.log("New connection, connected: " + onlineCount)
+    io.emit('online', onlineCount)
+
     socket.on('disconnect', () => {
-        console.log("Bye~ client")
-    })
-    socket.on('greet', () => {
-        socket.emit("greet", "Hi~ Client")
+        onlineCount--;
+        io.emit('online', onlineCount)
+        console.log("Close connection, connected: " + onlineCount)
     })
 })
 
