@@ -31,6 +31,8 @@ io.on('connection', (socket) => {
 
     socket.on('send', (msg) => {
         console.log(msg)
+        if (Object.keys(msg).length < 2)
+            return;
         io.emit('msg', msg)
     })
 })
