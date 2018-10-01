@@ -19,7 +19,9 @@ function setupSubmitForm() {
     sendForm.addEventListener('submit', (e) => {
         e.preventDefault();
 
-        let formData = {};
+        let formData = {
+            time: new Date().toUTCString()
+        };
         let formChild = sendForm.children;
         let hasContent= true;
         const nameInputBox = document.getElementById('name')

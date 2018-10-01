@@ -1,7 +1,10 @@
 const { EventEmitter } = require('events')
+const mongoose = require('./db-connector')
+const schema = require('./schema')
+
+const Message = mongoose.model('Message', schema)
 
 let instance
-let data = []
 let MAX = 50
 
 class Records extends EventEmitter {
@@ -10,16 +13,23 @@ class Records extends EventEmitter {
     }
 
     push(msg) {
-        data.push(msg)
+        const m = new Message(msg)
+        m.save()
 
-        if (data.length > MAX) {
-            data.splice(0, 1) // remove oldest msg
-        }
+        Message.count().then((count) => {
+            if (count >= MAX) {
+                Message.find().sort({'time': 1}).limit(1).then((res) => {
+                    Message.findByIdAndRemove(res[0]._id)
+                })
+            }
+        })
         this.emit('new_message', msg)
     }
 
-    get() {
-        return data
+    get(cb) {
+        Message.find((err, msgs) => {
+            cb(msgs)
+        })
     }
 
     setMax(max) {

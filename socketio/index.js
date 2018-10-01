@@ -28,7 +28,9 @@ io.on('connection', (socket) => {
     console.log("New connection, connected: " + onlineCount)
     io.emit('online', onlineCount)
     socket.emit('maxRecord', records.getMax())
-    socket.emit('chatRecord', records.get())
+    records.get((msgs) => {
+        socket.emit('chatRecord', msgs)
+    })
 
     socket.on('disconnect', () => {
         onlineCount--;
