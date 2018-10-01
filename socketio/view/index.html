@@ -5,15 +5,12 @@
     <title>Chat</title>
     <link rel="stylesheet" type="text/css" href="style.css">
     <script src="/socket.io/socket.io.js"></script>
-    <script>
-        var socket = io();
-    </script>
 </head>
 <body>
     <div id="container">
         <div id="action-bar">
             <div id="status-box">Server: <span id="status">-</span> / <span id="online">0</span> online.</div>
-            <button id="remove-all-btn" onclick="onRemoveAll()">Remove all messages</button>
+            <button id="remove-all-btn">Remove all messages</button>
         </div>
         <div id="content">
             <div class="msg">

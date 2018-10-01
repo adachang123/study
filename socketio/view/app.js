@@ -1,4 +1,11 @@
-function setupConnectStatus() {
+(() => {
+
+let { setCookie, getCookie, escapeHTML } = window.utils
+
+let socket = io()
+let maxRecordCount = 0
+
+let setupConnectStatus = () => {
     let status = document.getElementById('status')
     let online = document.getElementById('online')
 
@@ -13,108 +20,102 @@ function setupConnectStatus() {
     })
 }
 
-function setupSubmitForm() {
-    let sendForm = document.getElementById('send-form');
+let setupSubmitForm = () => {
+    let sendForm = document.forms['send-form']
 
     sendForm.addEventListener('submit', (e) => {
         e.preventDefault();
 
-        let formData = {
-            time: new Date().toUTCString()
-        };
-        let formChild = sendForm.children;
-        let hasContent= true;
-        const nameInputBox = document.getElementById('name')
-
-        for(let i =0; i < sendForm.childElementCount; i++) {
-            let child = formChild[i];
-            if (child.name !== "") {
-                let msg = child.value;
-                hasContent = (msg === "" | !msg) ? false : true;
-                if (hasContent) {
-                    child.classList.remove('error')
-                    formData[child.name] = msg;
-                } else {
-                    child.classList.add('error')
-                }
+        let hasContent = true
+        let formData = Array.from(sendForm.elements).reduce((obj, input) => {
+            if (!input.name) {
+                return obj
             }
+
+            obj[input.name] = input.value
+            if (!input.value) {
+                input.classList.add('error')
+                hasContent = false
+            } else {
+                input.classList.remove('error')
+            }
+            return obj
+        }, {
+            time: new Date().toUTCString()
+        })
+
+        if (hasContent) {
+            socket.emit('send', formData)
+            setCookie('name', formData.name)
         }
-        if (hasContent)
-            socket.emit("send", formData);
-            setCookie('name', nameInputBox.value)
     })
 }
 
-function addMsgToBox(data) {
-    let content = document.getElementById('content')
-    let msgBox = document.createElement('div')
-    msgBox.className = 'msg'
-    let nameBox = document.createElement('span')
-    nameBox.className = 'name'
-    let name = document.createTextNode(data.name)
-    let msg = document.createTextNode(data.msg)
+let setupRemoveAllBtn = () => {
+    let btn = document.getElementById('remove-all-btn')
+    btn.addEventListener('click', () => {
+        socket.emit('remove-all')
+    })
+}
 
-    nameBox.appendChild(name)
-    msgBox.appendChild(nameBox)
-    msgBox.appendChild(msg)
+let addMsgToBox = (data) => {
+    let content = document.getElementById('content')
+
+    let msgBox = document.createElement('div')
+    msgBox.classList.add('msg')
+    msgBox.innerHTML = [
+        `<span class="name">${escapeHTML(data.name)}</span>`,
+        `${escapeHTML(data.msg)}`,
+    ].join('')
     content.appendChild(msgBox)
 
-    if (content.children.length > max_record) {
+    if (content.children.length > maxRecordCount) {
         rmMsgFromBox()
     }
 }
 
-function rmMsgFromBox() {
+let rmMsgFromBox = () => {
     let content = document.getElementById('content')
-    let childs = content.children
-    childs[0].remove()
-}
-
-function clearMsgs() {
-    let content = document.getElementById('content')
-    let childs = content.children
-    const size = childs.length -1
-    for (let i=0; i < size; i++) {
-        childs[1].remove()
+    if (content.children.length === 0) {
+        return
     }
+    content.children[0].remove()
 }
 
-function setupMsgEvents() {
-    let content = document.getElementById('content');
-    const nameInputBox = document.getElementById('name')
-    const name = getCookie('name')
+let clearMsgs = () => {
+    let content = document.getElementById('content')
+    content.innerHTML = ''
+}
+
+let setupMsgEvents = () => {
+    let content = document.getElementById('content')
+    let sendForm = document.forms['send-form']
+    let name = getCookie('name')
 
     if (name) {
-        nameInputBox.value = name;
+        sendForm.elements.name.value = name
     }
 
     socket.on('msg', addMsgToBox)
     socket.on('msg-clear', clearMsgs)
 }
 
-function loadChatRecords() {
-    let max_record;
-
-    socket.on('chatRecord', function(msgs) {
-        for (let i=0; i < msgs.length; i++) {
-            addMsgToBox(msgs[i]) //?? check example source
-        }
+let loadChatRecords = () => {
+    socket.on('chat-records', (msgs) => {
+        msgs.forEach(addMsgToBox)
     })
 
-    socket.on('maxRecord', (amount) => {
-        max_record = amount
+    socket.on('max-record', (amount) => {
+        maxRecordCount = amount
     })
 }
 
-function onRemoveAll() {
-    socket.emit('remove-all')
-}
-
-var max_record;
-
-document.addEventListener("DOMContentLoaded", () => {
-    setupConnectStatus();
-    setupSubmitForm();
-    setupMsgEvents();
-    loadChatRecords();
+document.addEventListener('DOMContentLoaded', () => {
+    setupConnectStatus()
+    setupSubmitForm()
+    setupRemoveAllBtn()
+    setupMsgEvents()
+    loadChatRecords()
 })
+
+})()
