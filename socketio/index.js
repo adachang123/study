@@ -12,6 +12,10 @@ app.get('/app.js', (req, res) => {
     res.sendFile(__dirname + '/view/app.js')
 })
 
+app.get('/utils.js', (req, res) => {
+    res.sendFile(__dirname + '/view/utils.js')
+})
+
 app.get('/style.css', (req, res) => {
     res.sendFile(__dirname + '/view/style.css')
 })

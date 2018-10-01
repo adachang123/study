@@ -22,6 +22,7 @@ function setupSubmitForm() {
         let formData = {};
         let formChild = sendForm.children;
         let hasContent= true;
+        const nameInputBox = document.getElementById('name')
 
         for(let i =0; i < sendForm.childElementCount; i++) {
             let child = formChild[i];
@@ -38,11 +39,18 @@ function setupSubmitForm() {
         }
         if (hasContent)
             socket.emit("send", formData);
+            setCookie('name', nameInputBox.value)
     })
 }
 
 function setupReceiveMsg() {
     let content = document.getElementById('content');
+    const nameInputBox = document.getElementById('name')
+    const name = getCookie('name')
+
+    if (name) {
+        nameInputBox.value = name;
+    }
 
     socket.on('msg', (data) => {
         let msgBox = document.createElement('div')
