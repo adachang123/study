@@ -2,8 +2,9 @@
   "name": "test-socketio",
   "version": "1.0.0",
   "description": "Test Socket.io",
-  "main": "index.js",
+  "main": "socketio/index.js",
   "scripts": {
+    "start": "node socketio/index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
