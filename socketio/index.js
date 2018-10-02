@@ -45,6 +45,6 @@ io.on('connection', (socket) => {
 
 message.on('new-message', (msg) => io.emit('msg', msg))
 
-server.listen(3000, () => {
+server.listen(process.env.PORT || 3000, () => {
     console.log("Server started to listen port 3000")
 })
