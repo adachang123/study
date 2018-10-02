@@ -4,54 +4,24 @@ let { setCookie, getCookie, escapeHTML } = window.utils
 
 let maxRecordCount = 0
 
-let ws = new WebSocket('ws://localhost:1337')
+let ws = new WS('ws://localhost:1337');
 
 let setupWSEvents = () => {
     let status = document.getElementById('status')
 
-    ws.onopen = () => {
-        status.innerText = 'Connected'
-    }
+    // system status
+    ws.on('connect', () => { status.innerText = 'Connected' })
+    ws.on('disconnect', () => { status.innerText = 'Disconnected' })
+    ws.on('count', (json) => {
+        let online = document.getElementById('online')
+        online.innerText = json.count
+    })
+    ws.on('max-record', (json) => { maxRecordCount = json.size })
+    ws.on('chat-records', (json) => { json.messages.forEach(addMsgToBox) })
 
-    ws.onclose = () => {
-        status.innerText = 'Disconnected'
-    }
-
-    ws.onerror = function (error) {
-        content.html(`<p>Sorry, but there's some problem with your connection
-                         or the server is down.</p>`)
-    }
-
-    ws.onmessage = function (message) {
-        let json = {}
-        try {
-            json = JSON.parse(message.data)
-        } catch (e) {
-            console.log(`Invalid JSON: ${message.data}`)
-            return;
-        }
-
-        switch (json.type) {
-            case 'count':
-                let online = document.getElementById('online')
-                online.innerText = json.count
-                break
-            case 'msg':
-                addMsgToBox(json.msg)
-                break
-            case 'msg-clear':
-                clearMsgs()
-                break
-            case 'max-record':
-                maxRecordCount = json.size
-                break
-            case 'chat-records':
-                json.messages.forEach(addMsgToBox)
-                break
-            default:
-                console.log(`Action not handled!! ${message}`)
-        }
-    };
+    // actions
+    ws.on('msg', (json) => { addMsgToBox(json.msg) })
+    ws.on('msg-clear', clearMsgs)
 }
 
 let setupSubmitForm = () => {
@@ -75,12 +45,11 @@ let setupSubmitForm = () => {
             }
             return obj
         }, {
-            type: 'new-msg',
             time: new Date().toUTCString()
         })
 
         if (hasContent) {
-            ws.send(JSON.stringify(formData))
+            ws.send('new-msg', formData)
             setCookie('name', formData.name)
         }
     })
@@ -89,7 +58,7 @@ let setupSubmitForm = () => {
 let setupRemoveAllBtn = () => {
     let btn = document.getElementById('remove-all-btn')
     btn.addEventListener('click', () => {
-        ws.send(JSON.stringify({type: 'remove-all'}))
+        ws.send('remove-all')
     })
 }
 
