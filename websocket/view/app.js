@@ -2,22 +2,56 @@
 
 let { setCookie, getCookie, escapeHTML } = window.utils
 
-let socket = io()
 let maxRecordCount = 0
 
-let setupConnectStatus = () => {
-    let status = document.getElementById('status')
-    let online = document.getElementById('online')
+let ws = new WebSocket('ws://localhost:1337')
 
-    socket.on('connect', () => {
+let setupWSEvents = () => {
+    let status = document.getElementById('status')
+
+    ws.onopen = () => {
         status.innerText = 'Connected'
-    })
-    socket.on('disconnect', () => {
+    }
+
+    ws.onclose = () => {
         status.innerText = 'Disconnected'
-    })
-    socket.on('online', (ammount) => {
-        online.innerText = ammount
-    })
+    }
+
+    ws.onerror = function (error) {
+        content.html(`<p>Sorry, but there's some problem with your connection
+                         or the server is down.</p>`)
+    }
+
+    ws.onmessage = function (message) {
+        let json = {}
+        try {
+            json = JSON.parse(message.data)
+        } catch (e) {
+            console.log(`Invalid JSON: ${message.data}`)
+            return;
+        }
+
+        switch (json.type) {
+            case 'count':
+                let online = document.getElementById('online')
+                online.innerText = json.count
+                break
+            case 'msg':
+                addMsgToBox(json.msg)
+                break
+            case 'msg-clear':
+                clearMsgs()
+                break
+            case 'max-record':
+                maxRecordCount = json.size
+                break
+            case 'chat-records':
+                json.messages.forEach(addMsgToBox)
+                break
+            default:
+                console.log(`Action not handled!! ${message}`)
+        }
+    };
 }
 
 let setupSubmitForm = () => {
@@ -41,11 +75,12 @@ let setupSubmitForm = () => {
             }
             return obj
         }, {
+            type: 'new-msg',
             time: new Date().toUTCString()
         })
 
         if (hasContent) {
-            socket.emit('send', formData)
+            ws.send(JSON.stringify(formData))
             setCookie('name', formData.name)
         }
     })
@@ -54,7 +89,7 @@ let setupSubmitForm = () => {
 let setupRemoveAllBtn = () => {
     let btn = document.getElementById('remove-all-btn')
     btn.addEventListener('click', () => {
-        socket.emit('remove-all')
+        ws.send(JSON.stringify({type: 'remove-all'}))
     })
 }
 
@@ -87,35 +122,20 @@ let clearMsgs = () => {
     content.innerHTML = ''
 }
 
-let setupMsgEvents = () => {
-    let content = document.getElementById('content')
+let loadCookie = () => {
     let sendForm = document.forms['send-form']
     let name = getCookie('name')
 
     if (name) {
         sendForm.elements.name.value = name
     }
-
-    socket.on('msg', addMsgToBox)
-    socket.on('msg-clear', clearMsgs)
-}
-
-let loadChatRecords = () => {
-    socket.on('chat-records', (msgs) => {
-        msgs.forEach(addMsgToBox)
-    })
-
-    socket.on('max-record', (amount) => {
-        maxRecordCount = amount
-    })
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    setupConnectStatus()
+    setupWSEvents()
     setupSubmitForm()
     setupRemoveAllBtn()
-    setupMsgEvents()
-    loadChatRecords()
+    loadCookie()
 })
 
 })()
