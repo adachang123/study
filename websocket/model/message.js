@@ -4,8 +4,6 @@ const schema = require('../schema/message')
 
 const Message = mongoose.model('Message', schema)
 
-let instance
-
 class Model extends EventEmitter {
     constructor() {
         super()
@@ -38,7 +36,7 @@ class Model extends EventEmitter {
         })
     }
 
-    get(cb) {
+    get() {
         return new Promise((resolve, reject) => {
             Message.find((err, msgs) => err? reject(err): resolve(msgs))
         })
@@ -53,9 +51,4 @@ class Model extends EventEmitter {
     }
 }
 
-module.exports = (() => {
-    if (!instance) {
-        instance = new Model()
-    }
-    return instance
-})()
+module.exports = new Model()

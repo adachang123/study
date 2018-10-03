@@ -13,85 +13,88 @@ app.use(express.static(path.join(__dirname, 'view')))
 
 /* Web Socket server */
 let webSocketsServerPort = 1337
-let clientList = []
 
-let webSocketServer = require('websocket').server;
+let WebSocketServer = require('websocket').server;
 let http = require('http');
 let server = http.createServer();
 
-server.listen(webSocketsServerPort, function() {
-    console.log("WebSocket Server is listening on port " + webSocketsServerPort);
-});
+server.listen(webSocketsServerPort, () => {
+    console.log(`WebSocket Server is listening on port ${webSocketsServerPort}`)
+})
 
-let wsServer = new webSocketServer({
+class WSServer extends WebSocketServer {
+    constructor(opts) {
+        super(opts)
+        this.clientList = []
+    }
+    send(conn, type, data) {
+        conn.sendUTF(JSON.stringify({
+            type: type,
+            data: data
+        }))
+    }
+    broadcast(type, data) {
+        this.clientList.forEach((conn) => this.send(conn, type, data))
+    }
+    init(conn) {
+        this.addClient(conn)
+        conn.on('message', (data) => {
+            let msg
+            try {
+                msg = JSON.parse(data.utf8Data)
+              } catch (e) {
+                console.error(`BadMsg ${data.utf8Data}`)
+                return
+            }
+
+            conn.emit(msg.type, msg.data)
+        })
+        conn.on('close', () => {
+            this.removeClient(conn)
+            conn.emit('disconnect')
+        })
+    }
+    addClient(conn) {
+        this.clientList.push(conn)
+    }
+    removeClient(conn) {
+        this.clientList.splice(this.clientList.indexOf(conn), 1)
+    }
+    countClient() {
+        return this.clientList.length
+    }
+}
+
+let wsServer = new WSServer({
     httpServer: server
-});
+})
+
+message.on('new-message', (msg) => wsServer.broadcast('msg', msg))
 
 wsServer.on('request', function(request) {
-    const sendMsg = function(data) {
-         connection.sendUTF(JSON.stringify(data));
-    }
-    const broadcastMsg = function(data) {
-        clientList.forEach(function(client) {
-            client.sendUTF(JSON.stringify(data));
-        });
-    }
+    let conn = request.accept(null, request.origin)
+    this.init(conn)
 
-    let connection = request.accept(null, request.origin);
-    clientList.push(connection)
-
-    broadcastMsg({
-        type: 'count',
-        count: clientList.length
-    })
-
-    sendMsg({
-        type: 'max-record',
-        size: message.getMax()
-    });
-
-    connection.on('message', function(data) {
-        let msg = JSON.parse(data.utf8Data)
-
-        switch (msg.type) {
-            case 'new-msg':
-                if (Object.keys(msg).length < 2) {
-                    return
-                }
-                message.push(msg)
-                break
-            case 'remove-all':
-                message.removeAll()
-                    .then(() => {
-                        broadcastMsg({type: 'msg-clear'});
-                    })
-                    .catch(console.error)
-                break
-            default:
-                console.log(`Action not handled: ${msg}`)
+    conn.on('new-msg', (msg) => {
+        if (Object.keys(msg).length < 2) {
+            return
         }
-    });
-
-    message.on('new-message', (msg) => {
-        sendMsg({
-            type: 'msg',
-            msg: msg
-        })
+        message.push(msg)
     })
+
+    conn.on('remove-all', (msg) => {
+        message.removeAll()
+            .then(() => this.broadcast('msg-clear'))
+            .catch(console.error)
+    })
+
+    this.send(conn, 'max-record', message.getMax())
 
     message.get().then((msgs) => {
-        sendMsg({
-            type: 'chat-records',
-            messages: msgs
-        });
+        this.send(conn, 'chat-records', msgs)
     })
     .catch(console.error)
 
-    connection.on('close', function(connection) {
-        clientList.splice(clientList.indexOf(connection), 1)
-        broadcastMsg({
-            type: 'count',
-            count: clientList.length
-        })
-    });
-});
+    this.broadcast('count', this.countClient())
+    conn.on('disconnect', () => this.broadcast('count', this.countClient()))
+}.bind(wsServer))

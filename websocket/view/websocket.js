@@ -1,7 +1,9 @@
-class WS extends Object {
+(() => {
+
+class WS {
     constructor(url) {
-        super()
         let ws = this.ws = new WebSocket(url)
+
         ws.onopen = () => {
             this.dispatch('connect')
         }
@@ -20,21 +22,33 @@ class WS extends Object {
                 console.log(`Invalid JSON: ${message.data}`)
                 return;
             }
-    
-            this.dispatch(json.type, json)
+            this.dispatch(json.type, json.data)
         }
+
+        this.listeners = {}
     }
-    dispatch(eventname, data) {
-        let e = new CustomEvent(eventname, {detail: data});
-        document.body.dispatchEvent(e)
+    dispatch(name, data) {
+        (this.listeners[name] || []).forEach((cb) => cb(data))
     }
-    on(eventname, cb) {
-        document.body.addEventListener(eventname, (e) => {
-            cb(e.detail)
-        })
+    on(name, cb) {
+        this.listeners[name] = this.listeners[name] || []
+        this.listeners[name].push(cb)
     }
-    send(type, data = {}) {
-        data.type = type;
-        this.ws.send(JSON.stringify(data))
+    un(name, cb) {
+        let listeners = this.listeners[name] || []
+        listeners.splice(listeners.indexOf(cb), -1)
+    }
+    removeAllListeners() {
+        this.listeners = {}
+    }
+    send(type, data) {
+        this.ws.send(JSON.stringify({
+            type: type,
+            data: data
+        }))
     }
 }
+
+window.WS = WS
+
+})()

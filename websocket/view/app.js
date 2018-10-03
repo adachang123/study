@@ -1,6 +1,7 @@
 (() => {
 
 let { setCookie, getCookie, escapeHTML } = window.utils
+let WS = window.WS
 
 let maxRecordCount = 0
 
@@ -12,15 +13,15 @@ let setupWSEvents = () => {
     // system status
     ws.on('connect', () => { status.innerText = 'Connected' })
     ws.on('disconnect', () => { status.innerText = 'Disconnected' })
-    ws.on('count', (json) => {
+    ws.on('count', (count) => {
         let online = document.getElementById('online')
-        online.innerText = json.count
+        online.innerText = count
     })
-    ws.on('max-record', (json) => { maxRecordCount = json.size })
-    ws.on('chat-records', (json) => { json.messages.forEach(addMsgToBox) })
+    ws.on('max-record', (size) => { maxRecordCount = size })
+    ws.on('chat-records', (msgs) => { msgs.forEach(addMsgToBox) })
 
     // actions
-    ws.on('msg', (json) => { addMsgToBox(json.msg) })
+    ws.on('msg', (msg) => { addMsgToBox(msg) })
     ws.on('msg-clear', clearMsgs)
 }
 
