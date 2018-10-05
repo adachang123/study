@@ -1,0 +1,17 @@
+{
+  "name": "test-rx-dd",
+  "version": "1.0.0",
+  "description": "Test Rxjs drag and drop",
+  "main": "index.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Ada",
+  "license": "ISC",
+  "dependencies": {
+    "rxjs": "^6.3.3"
+  },
+  "devDependencies": {
+  }
+}
