@@ -8,4 +8,8 @@ var source = Rx.Observable.interval(400).take(9)
 // such as map, filter, reduce, scan, merge, delay, 
 // concat, take, etc.
 
+let result = source.map(x=>parseInt(x))
+                  .filter(num => !isNaN(num))
+                  .reduce((sum, next) => sum + next, 0)
+
 result.subscribe(x => console.log(x));
