@@ -1,0 +1,82 @@
+<html>
+<header>
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+</header>
+<body>
+    <div id='app'> {{ msg }} </div>
+    <div id='app2' v-bind:title='msg'>
+        <span>
+            Hover mouse to see dynamically bound title
+        </span>
+    </div>
+    <div id='app3'>
+        <span v-if='show'>Now you see me</span>
+    </div>
+    <div id='app4'>
+        <ol>
+            <li v-for='todo in todos'> {{ todo.text }} </li>
+        </ol>
+    </div>
+    <div id='app5'>
+        <p> {{ msg }} </p>
+        <button v-on:click='reverseMsg'> Reverse Message </button>
+    </div>
+    <div id='app6'>
+        <p> Original Msg: {{msg}} </p>
+        <p> Reversed Msg: {{reverseMsg}} </p>
+        <input v-model='msg'>
+    </div>
+</body>
+<script>
+    var app = new Vue({
+        el: '#app',
+        data: {
+            msg: 'Hello Vue!'
+        }
+    })
+    var app2 = new Vue({
+        el: '#app2',
+        data: {
+            msg: 'You loaded this page on ' + new Date().toLocaleString()
+        }
+    })
+    var app3 = new Vue({
+        el: '#app3',
+        data: {
+            show: true
+        }
+    })
+    var app4 = new Vue({
+        el: '#app4',
+        data: {
+            todos: [
+                {text: 'Learn Javascript'},
+                {text: 'Learn Vue'},
+                {text: 'Build something'}
+            ]
+        }
+    })
+    var app5 = new Vue({
+        el: '#app5',
+        data: {
+            msg: 'Hello Vue.js!'
+        },
+        methods: {
+            reverseMsg: function() {
+                this.msg = this.msg.split('').reverse().join('')
+            }
+        }
+    })
+    var app6 = new Vue({
+        el: '#app6',
+        data: {
+            msg: 'Hello Vue!'
+        },
+        computed: {
+            reverseMsg: function() {
+                return this.msg.split('').reverse().join('')
+            }
+        }
+    })
+</script>
+</html>

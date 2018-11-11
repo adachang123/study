@@ -1,0 +1,36 @@
+<html>
+<header>
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+</header>
+<body>
+    <div id='app'>
+        <ol>
+            <todo-item
+                v-for='item in list'
+                v-on:click='onclick'
+                v-bind:todo='item'
+                v-bind:key='item.id'>
+            </todo-item>
+        </ol>
+    </div>
+</body>
+<script>
+    Vue.component('todo-item', {
+        props: ['todo'],
+        template: '<li> {{ todo.text }} </li>',
+        methods: {
+            onclick: function(){}
+        }
+    })
+    var app = new Vue({
+        el: '#app',
+        data: {
+            list: [
+                {id: 1, text: 'Vegetables', onclick: function(){console.log('1')}},
+                {id: 2, text: 'Cheese', onclick: function(){console.log('2')}},
+                {id: 3, text: 'Cat cans', onclick: function(){console.log('3')}}
+            ]
+        }
+    })
+</script>
+</html>
