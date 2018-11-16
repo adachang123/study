@@ -1,0 +1,39 @@
+<html>
+<header>
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+</header>
+<body>
+    <div id='app'>
+        <h3>Blog posts</h3>
+        <div :style='{fontSize: postFontSize + "em"}'
+            v-on:size-bigger='postFontSize += 0.1'
+            v-on:size-smaller='postFontSize -= 0.1'
+        >
+            <blog-post v-for='post in posts'
+                v-bind:key='post.id'
+                v-bind:post='post'
+            ></blog-post>
+        </div>
+        <div>Current font size: {{postFontSize}}</div>
+        <button v-on:click='$emit("size-bigger")'>Text Bigger</button>
+        <button v-on:click='$emit("size-smaller")'>Text Smaller</button>
+    </div>
+</body>
+<script>
+    Vue.component('blog-post', {
+        props: ['post'],
+        template: `<li>{{post.title}}</li>`
+    })
+
+    var app = new Vue({
+        el: '#app',
+        data: {
+            postFontSize: 1,
+            posts: [
+                {id: 1, title: 'Life is so hard'},
+                {id: 2, title: 'GNR concert @Taipei tomorrow'}
+            ]
+        }
+    })
+</script>
+</html>

@@ -1,0 +1,54 @@
+<html>
+<header>
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+</header>
+<body>
+    <div id='app'>
+        <h3>App 1: data built into component</h3>
+        <blog-posts></blog-posts>
+    </div>
+    <div id='app2'>
+        <h3>App 2: data from instance</h3>
+        <blog-posts2 v-bind:posts="posts"></blog-posts2>
+    </div>
+</body>
+<script>
+    Vue.component('blog-posts', {
+        data: function () {
+            return {
+                posts: [
+                    {id: 1, title: 'Life is so hard'},
+                    {id: 2, title: 'GNR concert @Taipei tomorrow'}
+                ]
+            }
+        },
+        template: `
+            <ol>
+                <li v-for='post in posts'>{{post.title}}</li>
+            </ol>`
+    })
+
+    var app = new Vue({
+        el: '#app'
+    })
+
+    // Test component version 2
+    Vue.component('blog-posts2', {
+        props: ['posts'],
+        template: `
+            <ol>
+                <li v-for='post in posts'>{{post.title}}</li>
+            </ol>`
+    })
+
+    var app2 = new Vue({
+        el: '#app2',
+        data: {
+            posts: [
+                {id: 1, title: 'Life is so hard'},
+                {id: 2, title: 'GNR concert @Taipei tomorrow'}
+            ]
+        }
+    })
+</script>
+</html>
