@@ -1,0 +1,48 @@
+<html>
+<header>
+    <script src="https://unpkg.com/vue/dist/vue.js"></script>
+    <script src="https://unpkg.com/vue-router/dist/vue-router.js"></script>
+</header>
+<body>
+    <div id='app'>
+        <h1>Hello Vue-Router</h1>
+        <p>
+            <router-link to="/music">Go to music</router-link>
+            <router-link to="movie">Go to movie</router-link>
+        </p>
+        <router-view></router-view>
+    </div>
+</body>
+<script>
+const Music = {
+    template: `
+        <ol>
+            <li>Radiohead</li>
+            <li>Red Hot Chili Peppers</li>
+        </ol>
+    `
+}
+
+const Movie = {
+    template: `
+        <ol>
+            <li>The Godfather</li>
+            <li>Star Wars</li>
+        </ol>
+    `
+}
+
+const routes = [
+    {path: '/music', component: Music}, 
+    {path: '/movie', component: Movie}
+]
+
+const router = new VueRouter({
+    routes // short for `routes: routes`
+})
+const app = new Vue({
+    router
+}).$mount('#app')
+
+</script>
+</html>

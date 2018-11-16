@@ -1,0 +1,33 @@
+<html>
+<header>
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+</header>
+<body>
+    <div id='app'>
+        <h1>Here</h1>
+        <my-panel>
+            <p>AA</p>
+            <p>BB</p>
+        </my-panel>
+    </div>
+</body>
+<script>
+    Vue.component('my-panel', {
+        template: 
+            `<div class="my-panel" style="backgrond-color: green">
+                <slot></slot>
+            </div>`
+    })
+    var app = new Vue({
+        el: '#app'
+        // el: '#app',
+        // data: {
+        //     list: [
+        //         {id: 1, text: 'Vegetables', onclick: function(){console.log('1')}},
+        //         {id: 2, text: 'Cheese', onclick: function(){console.log('2')}},
+        //         {id: 3, text: 'Cat cans', onclick: function(){console.log('3')}}
+        //     ]
+        // }
+    })
+</script>
+</html>
